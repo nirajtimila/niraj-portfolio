@@ -1,0 +1,19 @@
+{
+  "name": "nirajtimilaportfolio",
+  "version": "1.0.0",
+  "description": "portfolio website for nirajtimila ",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nirajtimila/niraj-portfolio.git"
+  },
+  "author": "Niraj Timila",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nirajtimila/niraj-portfolio/issues"
+  },
+  "homepage": "https://github.com/nirajtimila/niraj-portfolio#readme"
+}
