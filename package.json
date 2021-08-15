@@ -1,10 +1,12 @@
 {
-  "name": "nirajtimilaportfolio",
+  "name": "niraj-portfolio",
   "version": "1.0.0",
-  "description": "portfolio website for nirajtimila ",
+  "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run lite",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lite": "lite-server"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/nirajtimila/niraj-portfolio/issues"
   },
-  "homepage": "https://github.com/nirajtimila/niraj-portfolio#readme"
+  "homepage": "https://github.com/nirajtimila/niraj-portfolio#readme",
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
 }
