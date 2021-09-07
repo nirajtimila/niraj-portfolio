@@ -24,6 +24,14 @@ body {
   color: #6c757d;
   text-align: left;
   background-color: #ffffff;
+ 
+
+}
+.blurpart{
+ 
+ 
+
+  filter: blur(30px);
 }
  
 /* social links */
@@ -44,8 +52,8 @@ ul.social-network li {
 .social-network a.icoFacebook:hover {
 	background-color:#3B5998;
 }
-.social-network a.icoGoogle:hover {
-	background-color:#BD3518;
+.social-network a.icoGithub:hover {
+	background-color:black;
 }
 .social-network a.icoLinkedin:hover {
 	background-color: #2867B2;
@@ -357,4 +365,14 @@ h1,h2,h3,h4,h5,h6,p{
   100% {
     transform: translateY(-15px);
   }
+}
+
+
+.loading-text{
+position: absolute;
+left:700px;
+top:auto;
+  font-size: 50px;
+  color: #fff;
+  text-align: center;
 }
