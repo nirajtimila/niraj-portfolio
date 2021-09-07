@@ -370,8 +370,9 @@ h1,h2,h3,h4,h5,h6,p{
 
 .loading-text{
 position: absolute;
-left:700px;
-top:auto;
+left:40vw;
+top:50vh;
+
   font-size: 50px;
   color: #fff;
   text-align: center;
