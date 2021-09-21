@@ -30,6 +30,33 @@
 </head>
 
 <body data-spy="scroll" data-target=".navbar" data-offset="51">
+    <!-- Messenger Chat Plugin Code -->
+    <div id="fb-root"></div>
+
+    <!-- Your Chat Plugin code -->
+    <div id="fb-customer-chat" class="fb-customerchat">
+    </div>
+
+    <script>
+      var chatbox = document.getElementById('fb-customer-chat');
+      chatbox.setAttribute("page_id", "306864992827263");
+      chatbox.setAttribute("attribution", "biz_inbox");
+
+      window.fbAsyncInit = function() {
+        FB.init({
+          xfbml            : true,
+          version          : 'v12.0'
+        });
+      };
+
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = 'https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js';
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+    </script>
     <!-- Navbar Start -->
     <nav class="navbar fixed-top shadow-sm navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-lg-5">
         <a href="index.html" class="navbar-brand ml-lg-3">
@@ -75,10 +102,10 @@
                         
                        
                         <ul class="social-network social-circle">
-                            <li><a href="#" class="icoYt" title="Youtube"><i class="fa fa-youtube-play"></i></a></li>
-                            <li><a href="#" class="icoFacebook" title="Facebook"><i class="fa fa-facebook"></i></a></li>
-                            <li><a href="#" class="icoGithub" title="Github"><i class="fa fa-github"></i></a></li>
-                            <li><a href="#" class="icoLinkedin" title="linkedin-in"><i class="fa fa-linkedin-in"></i></a></li>
+                            <li><a href="#" class="icoYt" title="Youtube" target="_blank"><i class="fa fa-youtube-play"></i></a></li>
+                            <li><a href="#" class="icoFacebook" title="Facebook" target="_blank"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="https://github.com/nirajtimila" class="icoGithub" title="Github" target="_blank"><i class="fa fa-github"></i></a></li>
+                            <li><a href="https://www.linkedin.com/in/niraj-timila-451856122/" target="_blank" class="icoLinkedin" title="linkedin-in"><i class="fa fa-linkedin-in"></i></a></li>
                           </ul>
                     </div>
                 
@@ -295,22 +322,19 @@
                     <div class="border-left border-primary pt-2 pl-4 ml-2">
                         <div class="position-relative ex-me mb-4">
                             <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px; left: -35px; font-size: 22px;"></i>
-                            <h5 class="font-weight-bold mb-1">Bachelor of Science</h5>
-                            <p class="mb-2"><strong>Cambridge University</strong> | <small>2005 - 2009</small></p>
-                            <p>Tempor eos dolore amet tempor dolor tempor. Dolore ea magna sit amet dolor eirmod. Eos ipsum est tempor dolor. Clita lorem kasd sed ea lorem diam ea lorem eirmod duo sit ipsum stet lorem diam</p>
-                        </div>
+                            <h5 class="font-weight-bold mb-1">High school</h5>
+                            <p class="mb-2"><strong>Capital HS school, koteshwor, Kathmandu, Nepal</strong> | <small>2012 - 2014</small></p>
+                            <p>Scored: 72.5 %</p> </div>
                         <div class="position-relative ex-me mb-4">
                             <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px; left: -35px;  font-size: 22px;"></i>
-                            <h5 class="font-weight-bold mb-1">Master In CSE</h5>
-                            <p class="mb-2"><strong>Cambridge University</strong> | <small>2009 - 2011</small></p>
-                            <p>Tempor eos dolore amet tempor dolor tempor. Dolore ea magna sit amet dolor eirmod. Eos ipsum est tempor dolor. Clita lorem kasd sed ea lorem diam ea lorem eirmod duo sit ipsum stet lorem diam</p>
-                        </div>
+                            <h5 class="font-weight-bold mb-1">Bachelor in Business Administration</h5>
+                            <p class="mb-2"><strong>Texas College of management and IT (affiliated to Lincoln University College)</strong> | <small>2014 - 2019</small></p>
+                            <p>Scored: 3.7 ot of 4.00</p></div>
                         <div class="position-relative ex-me mb-4">
                             <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px; left: -35px;  font-size: 22px;"></i>
-                            <h5 class="font-weight-bold mb-1">IIT Kharagpur</h5>
-                            <p class="mb-2"><strong>Cambridge University</strong> | <small>2011 - 2015</small></p>
-                            <p>Tempor eos dolore amet tempor dolor tempor. Dolore ea magna sit amet dolor eirmod. Eos ipsum est tempor dolor. Clita lorem kasd sed ea lorem diam ea lorem eirmod duo sit ipsum stet lorem diam</p>
-                        </div>
+                            <h5 class="font-weight-bold mb-1">Master in information technology</h5>
+                            <p class="mb-2"><strong>Central Queensland University , Australia </strong> | <small>2019 - 2021</small></p>
+                            <p> Scored : 5.412 / 6.00</p></div>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -318,22 +342,54 @@
                     <div class="border-left border-primary pt-2 pl-4 ml-2">
                         <div class="position-relative ex-me mb-4">
                             <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px;left: -35px;  font-size: 22px;"></i>
-                            <h5 class="font-weight-bold mb-1">Web Designer</h5>
-                            <p class="mb-2"><strong>Soft Company</strong> | <small> Excellent</small></p>
-                            <p>Tempor eos dolore amet tempor dolor tempor. Dolore ea magna sit amet dolor eirmod. Eos ipsum est tempor dolor. Clita lorem kasd sed ea lorem diam ea lorem eirmod duo sit ipsum stet lorem diam</p>
+                            <h5 class="font-weight-bold mb-1">NCELL (Kathmandu, Nepal)</h5>
+                            <p class="mb-2"><strong>Customer Support and IT Support</strong> | <small> Aug 2013 - Oct 2015</small></p>
+                            <p>
+                                •	Keeping records of customer interactions, processing customer accounts and filing documents <br>
+                                •	Managing large amounts of incoming calls and email enquiries, Answering detailed product and service questions <br> 
+                                •	Handling complaints, providing appropriate solutions and alternatives, Compiling reports on overall customer satisfaction <br>
+                                •	Set up global and local video conferencing, meeting and audio dial-ins for end-users and clients.<br>
+
+                                </p>
+                            </div>
+                        <div class="position-relative ex-me mb-4">
+                            <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px;left: -35px;  font-size: 22px;"></i>
+                            <h5 class="font-weight-bold mb-1">Janaki technology </h5>
+                            <p class="mb-2"><strong>Application support analyst (part time)</strong> | <small> April 2016 – march 2017</small></p>
+                            <p>
+                                •	Troubleshot and resolved application issues escalated from end users.<br>
+                                •	Participated in daily, weekly, and bi-monthly status meetings.<br>
+                                •	Worked with development team to assess issues and test for solutions. <br>
+                                •	Integrated application software and hardware configuration changes.<br>
+                               
+
+                            </p>
                         </div>
                         <div class="position-relative ex-me mb-4">
                             <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px;left: -35px;  font-size: 22px;"></i>
-                            <h5 class="font-weight-bold mb-1">Artificial Intelligence</h5>
-                            <p class="mb-2"><strong>Soft Company</strong> | <small> Good</small></p>
-                            <p>Tempor eos dolore amet tempor dolor tempor. Dolore ea magna sit amet dolor eirmod. Eos ipsum est tempor dolor. Clita lorem kasd sed ea lorem diam ea lorem eirmod duo sit ipsum stet lorem diam</p>
-                        </div>
-                        <div class="position-relative ex-me mb-4">
+                            <h5 class="font-weight-bold mb-1">Bikalsoft Technology (Kathmandu, Nepal)</h5>
+                            <p class="mb-2"><strong>Web developer</strong> | <small> Feb 2017- dec 2017</small></p>
+                            <p>
+                                •	Meet with clients to discuss their website design and requirements <br>
+                                •	Create and test apps for the website, also create a prototype website using figma to demonstrate it to client. <br>
+                                •	Work with designers, such as graphic designers, to determine the site’s layout <br>
+                                •	Quality-test and troubleshoot the website and/or its applications in various browsers <br>
+
+                            </p>
+                         </div>
+                         <div class="position-relative ex-me mb-4">
                             <i class="far fa-dot-circle text-primary position-absolute" style="top: 2px;left: -35px;  font-size: 22px;"></i>
-                            <h5 class="font-weight-bold mb-1">Web Development</h5>
-                            <p class="mb-2"><strong>Soft Company</strong> | <small> Excellent</small></p>
-                            <p>Tempor eos dolore amet tempor dolor tempor. Dolore ea magna sit amet dolor eirmod. Eos ipsum est tempor dolor. Clita lorem kasd sed ea lorem diam ea lorem eirmod duo sit ipsum stet lorem diam</p>
-                        </div>
+                            <h5 class="font-weight-bold mb-1">Xclusive group (Sydney, Australia) </h5>
+                            <p class="mb-2"><strong>Consultant and support </strong> | <small> Nov 2018 – May 2021</small></p>
+                            <p>
+                                •	respond to requests for technical assistance in person, via phone, chat or email <br>
+                                •	follow up with customers and users to ensure complete resolution of issues <br>
+                                •	track and route problems and requests and document resolutions <br>
+                                •	attend daily and weekly meetings <br>
+                                
+
+                            </p>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -583,7 +639,7 @@
             <div class="d-flex justify-content-center mb-4">
                 <a class="btn btn-light btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
                 <a class="btn btn-light btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                <a class="btn btn-light btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a class="btn btn-light btn-social mr-2" href="https://www.linkedin.com/in/niraj-timila-451856122/"><i class="fab fa-linkedin-in"></i></a>
                 <a class="btn btn-light btn-social" href="#"><i class="fab fa-instagram"></i></a>
             </div>
             <div class="d-flex justify-content-center mb-3">
