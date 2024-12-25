@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plane Jump Game</title>
+  <style>
+    html, body {
+      background-color: #85b9dd;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .plane-container {
+      width: 150px;
+      height: 75px;
+      position: absolute;
+      left: 100px;
+      bottom: 150px;
+      transition: bottom 0.2s;
+      z-index: 3;
+    }
+    .cloud {
+      position: absolute;
+      width: 100px;
+      height: 60px;
+      top: 0;
+      z-index: 2;
+      opacity: 0.8;
+    }
+    .game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 30px;
+      text-align: center;
+      display: none;
+      z-index: 6;
+    }
+    .boom {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, red, orange, yellow, transparent);
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: boom-animation 0.5s ease-out;
+    }
+    @keyframes boom-animation {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+    @keyframes plane-fall {
+      0% {
+        bottom: 150px;
+      }
+      100% {
+        bottom: 0px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="plane-container" id="plane">
+      <object type="image/svg+xml" data="small-plane.svg" width="150" height="75"></object>
+    </div>
+    <div class="game-over" id="gameOver">
+      BOOM!! Game Over<br>
+      Press Space/Enter to restart
+    </div>
+  </div>
+
+  <script>
+    const plane = document.getElementById('plane');
+    const gameOverText = document.getElementById('gameOver');
+    let planeBottom = 150;
+    let planeLeft = 100;
+    let gameOver = false;
+    let cloudInterval;
+
+    function jump() {
+      if (planeBottom < window.innerHeight - 100) {
+        planeBottom += 50;
+        plane.style.bottom = planeBottom + 'px';
+      }
+    }
+
+    function applyGravity() {
+      if (!gameOver && planeBottom > 0) {
+        planeBottom -= 5;
+        plane.style.bottom = planeBottom + 'px';
+      }
+    }
+
+    function generateCloud() {
+      if (gameOver) return;
+
+      const cloud = document.createElement('div');
+      cloud.classList.add('cloud');
+      cloud.style.left = window.innerWidth + 'px';
+      cloud.style.top = Math.floor(Math.random() * (window.innerHeight - 60)) + 'px';
+
+      cloud.innerHTML = `<svg viewBox="0 0 100 60"><ellipse cx="30" cy="30" rx="30" ry="20" fill="#FFFFFF"/>
+        <ellipse cx="60" cy="30" rx="30" ry="20" fill="#FFFFFF"/>
+        <ellipse cx="45" cy="20" rx="30" ry="20" fill="#FFFFFF"/></svg>`;
+      document.body.appendChild(cloud);
+
+      function moveCloud() {
+        if (gameOver) return;
+
+        let cloudLeft = parseInt(window.getComputedStyle(cloud).left);
+        if (cloudLeft < -100) {
+          cloud.remove();
+        } else {
+          cloud.style.left = cloudLeft - 5 + 'px';
+          checkCollision(cloud);
+          requestAnimationFrame(moveCloud);
+        }
+      }
+      moveCloud();
+    }
+
+    function checkCollision(cloud) {
+      const cloudRect = cloud.getBoundingClientRect();
+      const planeRect = plane.getBoundingClientRect();
+
+      if (
+        cloudRect.left < planeRect.right &&
+        cloudRect.right > planeRect.left &&
+        cloudRect.top < planeRect.bottom &&
+        cloudRect.bottom > planeRect.top
+      ) {
+        createBoomEffect(planeRect);
+        triggerGameOver(planeRect);
+      }
+    }
+
+    function createBoomEffect(rect) {
+      const boom = document.createElement('div');
+      boom.classList.add('boom');
+      boom.style.left = rect.left + rect.width / 2 - 50 + 'px';
+      boom.style.top = rect.top + rect.height / 2 - 50 + 'px';
+      document.body.appendChild(boom);
+
+      setTimeout(() => boom.remove(), 500); // Remove the animation after it ends
+    }
+
+    function triggerGameOver(rect) {
+      gameOver = true;
+      clearInterval(cloudInterval);
+      document.removeEventListener('keydown', control);
+
+      // Store the plane's position at the time of collision
+      let fallPositionLeft = rect.left;
+      let fallPositionBottom = rect.top;
+
+      // Plane starts to fall from the point of collision
+      plane.style.left = fallPositionLeft + 'px'; // Set the plane's left position at collision point
+      plane.style.bottom = fallPositionBottom + 'px';
+      plane.style.animation = 'plane-fall 1s ease-in forwards';
+      plane.style.transform = 'rotate(45deg)'; // Rotate plane to simulate crash
+
+      // Wait for the plane to touch the ground, then hide the plane and show the game over text
+      setTimeout(() => {
+        plane.style.display = 'none';
+        createFinalBoom(fallPositionLeft, window.innerHeight - 100);
+      }, 1000);
+
+      gameOverText.style.display = 'block';
+
+      // Add event listener for restart
+      document.addEventListener('keydown', restartGame);
+    }
+
+    function restartGame(e) {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        resetGame();
+        document.removeEventListener('keydown', restartGame);
+      }
+    }
+
+    function createFinalBoom(left, bottom) {
+      const finalBoom = document.createElement('div');
+      finalBoom.classList.add('boom');
+      finalBoom.style.left = left - 50 + 'px'; // Position at the collision point
+      finalBoom.style.top = bottom + 'px'; // Position at the ground
+      document.body.appendChild(finalBoom);
+
+      setTimeout(() => finalBoom.remove(), 500); // Remove after animation
+    }
+
+    function resetGame() {
+      planeBottom = 150;
+      planeLeft = 100;
+      plane.style.bottom = planeBottom + 'px';
+      plane.style.left = planeLeft + 'px';
+      plane.style.animation = ''; // Reset animation
+      plane.style.display = 'block';
+      plane.style.transform = ''; // Reset rotation
+      gameOver = false;
+      gameOverText.style.display = 'none';
+      document.addEventListener('keydown', control);
+
+      cloudInterval = setInterval(generateCloud, 2000);
+      setInterval(applyGravity, 20);
+    }
+
+    function control(e) {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        if (gameOver) {
+          resetGame();
+        } else {
+          jump();
+        }
+      }
+    }
+
+    document.addEventListener('keydown', control);
+    cloudInterval = setInterval(generateCloud, 2000);
+    setInterval(applyGravity, 20);
+  </script>
+</body>
+</html>
