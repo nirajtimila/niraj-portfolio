@@ -95,16 +95,25 @@
     let gameOver = false;
     let cloudInterval;
 
+    // Detect if it's a mobile device
+    const isMobile = window.innerWidth <= 768;
+    const gravityFactor = isMobile ? 10 : 5; // Increase gravity on mobile devices
+    const mobileJumpHeight = 100; // Increased jump height for mobile devices
+    const desktopJumpHeight = 50; // Normal jump height for desktop
+
     function jump() {
+      // Jump higher on mobile devices
+      const jumpHeight = isMobile ? mobileJumpHeight : desktopJumpHeight;
+
       if (planeBottom < window.innerHeight - 100) {
-        planeBottom += 50;
+        planeBottom += jumpHeight;
         plane.style.bottom = planeBottom + 'px';
       }
     }
 
     function applyGravity() {
       if (!gameOver && planeBottom > 0) {
-        planeBottom -= 5;
+        planeBottom -= gravityFactor; // Apply increased gravity on mobile
         plane.style.bottom = planeBottom + 'px';
       }
     }
@@ -232,9 +241,20 @@
       }
     }
 
-    document.addEventListener('keydown', control);
+    // Add mobile touch event for jumping when tapped anywhere on the screen
+    if (isMobile) {
+      document.addEventListener('touchstart', (e) => {
+        if (!gameOver) {
+          jump(); // Jump higher on mobile when screen is tapped
+        }
+      });
+    } else {
+      document.addEventListener('keydown', control);
+    }
+
     cloudInterval = setInterval(generateCloud, 2000);
     setInterval(applyGravity, 20);
   </script>
 </body>
 </html>
+ 
