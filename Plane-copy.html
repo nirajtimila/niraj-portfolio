@@ -6,12 +6,20 @@
   <title>Plane Jump Game</title>
   <style>
     html, body {
-      background-color: #85b9dd;
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
+    }
+    .video-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
     }
     .frame {
       position: relative;
@@ -47,6 +55,14 @@
       display: none;
       z-index: 6;
     }
+    .score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 20px;
+      z-index: 5;
+    }
     .boom {
       position: absolute;
       width: 100px;
@@ -77,35 +93,46 @@
   </style>
 </head>
 <body>
+  <!-- Background video -->
+  <video class="video-background" autoplay loop muted>
+    <source src="download.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
   <div class="frame">
+    <div class="score" id="score">Score: 0 | High Score: 0</div>
     <div class="plane-container" id="plane">
-      <object type="image/svg+xml" data="small-plane.svg" width="150" height="75"></object>
+      <img src="Plane.png" width="150" height="75" alt="Plane">
     </div>
     <div class="game-over" id="gameOver">
       BOOM!! Game Over<br>
-      Press Space/Enter to restart
+      Press Space/Enter or Click/Tap to restart
     </div>
   </div>
 
   <script>
     const plane = document.getElementById('plane');
     const gameOverText = document.getElementById('gameOver');
+    const scoreDisplay = document.getElementById('score');
     let planeBottom = 150;
     let planeLeft = 100;
     let gameOver = false;
     let cloudInterval;
+    let gravityInterval;
+    let scoreInterval;
+    let score = 0;
+    let highScore = localStorage.getItem('highScore') || 0;
 
-    // Detect if it's a mobile device
+    scoreDisplay.textContent = `Score: ${score} | High Score: ${highScore}`;
+
     const isMobile = window.innerWidth <= 768;
-    const gravityFactor = isMobile ? 10 : 5; // Increase gravity on mobile devices
-    const mobileJumpHeight = 100; // Increased jump height for mobile devices
-    const desktopJumpHeight = 50; // Normal jump height for desktop
+    const gravityFactor = isMobile ? 10 : 5;
+    const mobileJumpHeight = 100;
+    const desktopJumpHeight = 50;
 
     function jump() {
-      // Jump higher on mobile devices
       const jumpHeight = isMobile ? mobileJumpHeight : desktopJumpHeight;
-
-      if (planeBottom < window.innerHeight - 100) {
+      if (!gameOver && planeBottom < window.innerHeight - 100) {
         planeBottom += jumpHeight;
         plane.style.bottom = planeBottom + 'px';
       }
@@ -113,7 +140,7 @@
 
     function applyGravity() {
       if (!gameOver && planeBottom > 0) {
-        planeBottom -= gravityFactor; // Apply increased gravity on mobile
+        planeBottom -= gravityFactor;
         plane.style.bottom = planeBottom + 'px';
       }
     }
@@ -125,10 +152,11 @@
       cloud.classList.add('cloud');
       cloud.style.left = window.innerWidth + 'px';
       cloud.style.top = Math.floor(Math.random() * (window.innerHeight - 60)) + 'px';
-
-      cloud.innerHTML = `<svg viewBox="0 0 100 60"><ellipse cx="30" cy="30" rx="30" ry="20" fill="#FFFFFF"/>
+      cloud.innerHTML = `<svg viewBox="0 0 100 60">
+        <ellipse cx="30" cy="30" rx="30" ry="20" fill="#FFFFFF"/>
         <ellipse cx="60" cy="30" rx="30" ry="20" fill="#FFFFFF"/>
-        <ellipse cx="45" cy="20" rx="30" ry="20" fill="#FFFFFF"/></svg>`;
+        <ellipse cx="45" cy="20" rx="30" ry="20" fill="#FFFFFF"/>
+      </svg>`;
       document.body.appendChild(cloud);
 
       function moveCloud() {
@@ -157,7 +185,7 @@
         cloudRect.bottom > planeRect.top
       ) {
         createBoomEffect(planeRect);
-        triggerGameOver(planeRect);
+        triggerGameOver();
       }
     }
 
@@ -168,71 +196,56 @@
       boom.style.top = rect.top + rect.height / 2 - 50 + 'px';
       document.body.appendChild(boom);
 
-      setTimeout(() => boom.remove(), 500); // Remove the animation after it ends
+      setTimeout(() => boom.remove(), 500);
     }
 
-    function triggerGameOver(rect) {
+    function triggerGameOver() {
       gameOver = true;
       clearInterval(cloudInterval);
+      clearInterval(gravityInterval);
+      clearInterval(scoreInterval);
       document.removeEventListener('keydown', control);
 
-      // Store the plane's position at the time of collision
-      let fallPositionLeft = rect.left;
-      let fallPositionBottom = rect.top;
-
-      // Plane starts to fall from the point of collision
-      plane.style.left = fallPositionLeft + 'px'; // Set the plane's left position at collision point
-      plane.style.bottom = fallPositionBottom + 'px';
       plane.style.animation = 'plane-fall 1s ease-in forwards';
-      plane.style.transform = 'rotate(45deg)'; // Rotate plane to simulate crash
-
-      // Wait for the plane to touch the ground, then hide the plane and show the game over text
+      plane.style.transform = 'rotate(45deg)';
       setTimeout(() => {
         plane.style.display = 'none';
-        createFinalBoom(fallPositionLeft, window.innerHeight - 100);
+        document.querySelectorAll('.cloud').forEach(cloud => cloud.remove());
+        gameOverText.style.display = 'block';
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('highScore', highScore);
+        }
       }, 1000);
-
-      gameOverText.style.display = 'block';
-
-      // Add event listener for restart
-      document.addEventListener('keydown', restartGame);
-    }
-
-    function restartGame(e) {
-      if (e.code === 'Space' || e.code === 'Enter') {
-        resetGame();
-        document.removeEventListener('keydown', restartGame);
-      }
-    }
-
-    function createFinalBoom(left, bottom) {
-      const finalBoom = document.createElement('div');
-      finalBoom.classList.add('boom');
-      finalBoom.style.left = left - 50 + 'px'; // Position at the collision point
-      finalBoom.style.top = bottom + 'px'; // Position at the ground
-      document.body.appendChild(finalBoom);
-
-      setTimeout(() => finalBoom.remove(), 500); // Remove after animation
     }
 
     function resetGame() {
       planeBottom = 150;
-      planeLeft = 100;
-      plane.style.bottom = planeBottom + 'px';
-      plane.style.left = planeLeft + 'px';
-      plane.style.animation = ''; // Reset animation
+      plane.style.bottom = `${planeBottom}px`;
       plane.style.display = 'block';
-      plane.style.transform = ''; // Reset rotation
+      plane.style.animation = '';
+      plane.style.transform = '';
       gameOver = false;
+      score = 0;
+      scoreDisplay.textContent = `Score: ${score} | High Score: ${highScore}`;
       gameOverText.style.display = 'none';
-      document.addEventListener('keydown', control);
+      startGame();
+    }
 
+    function startGame() {
+      document.addEventListener('keydown', control);
       cloudInterval = setInterval(generateCloud, 2000);
-      setInterval(applyGravity, 20);
+      gravityInterval = setInterval(applyGravity, 20);
+      scoreInterval = setInterval(() => {
+        if (!gameOver) {
+          score++;
+          scoreDisplay.textContent = `Score: ${score} | High Score: ${highScore}`;
+        }
+      }, 100);
     }
 
     function control(e) {
-      if (e.code === 'Space' || e.code === 'Enter') {
+      if (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyR') {
         if (gameOver) {
           resetGame();
         } else {
@@ -241,20 +254,21 @@
       }
     }
 
-    // Add mobile touch event for jumping when tapped anywhere on the screen
-    if (isMobile) {
-      document.addEventListener('touchstart', (e) => {
-        if (!gameOver) {
-          jump(); // Jump higher on mobile when screen is tapped
-        }
-      });
-    } else {
-      document.addEventListener('keydown', control);
+    function handleScreenClick() {
+      if (gameOver) {
+        resetGame();
+      }
     }
 
-    cloudInterval = setInterval(generateCloud, 2000);
-    setInterval(applyGravity, 20);
+    if (isMobile) {
+      document.addEventListener('touchstart', jump);
+      document.addEventListener('click', handleScreenClick); // Restart game on click
+    } else {
+      document.addEventListener('keydown', control);
+      document.addEventListener('click', handleScreenClick); // Restart game on click
+    }
+
+    startGame();
   </script>
 </body>
 </html>
- 
