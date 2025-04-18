@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve HTML from 'public' folder
@@ -43,7 +45,7 @@ app.post('/submit', async (req, res) => {
     pushLog("🚀 Let it begain...");
 
     browser = await puppeteer.launch({
-      headless: true, // Run in headless mode (hidden)
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
@@ -63,13 +65,12 @@ app.post('/submit', async (req, res) => {
     pushLog("⏳ Waiting for progress...");
     await page.waitForSelector('.progress-bar', { timeout: 60000 });
 
-    // Manually trigger progress updates to frontend
     for (let progress = 0; progress <= 100; progress += 2) {
-      pushLog(`Progress: ${progress}%`); // Log to terminal
+      pushLog(`Progress: ${progress}%`);
       if (clientRes) {
-        clientRes.write(`data: Progress: ${progress}%\n\n`); // Emit to client
+        clientRes.write(`data: Progress: ${progress}%\n\n`);
       }
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
 
     await page.waitForFunction(() => {
@@ -110,4 +111,7 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("🚀 Server running at http://localhost:3000"));
+// ✅ Listen on all interfaces and dynamic port for Render
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
