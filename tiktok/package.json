@@ -4,7 +4,7 @@
   "description": "TikTok Views Booster Tool",
   "main": "server.js",
   "scripts": {
-    "start": "node tiktok/server.js"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
