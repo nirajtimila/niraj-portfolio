@@ -2,17 +2,27 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve HTML from 'public' folder
 
+// Serve HTML from 'public' folder if it exists, otherwise return a 404
+const publicFolderPath = path.join(__dirname, 'public');
+if (fs.existsSync(publicFolderPath)) {
+  app.use(express.static(publicFolderPath)); 
+} else {
+  console.warn('Public folder not found.');
+}
+
+// Global variables to store logs and client response
 let clientRes = null;
 let logs = [];
 
+// Endpoint for serving logs to the client in real-time
 app.get('/progress', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -28,12 +38,14 @@ app.get('/progress', (req, res) => {
   logs.forEach(sendLog);
 });
 
+// Utility function to log messages
 function pushLog(message) {
   console.log(message); // Log to the terminal
   logs.push(message);
   if (clientRes) clientRes.write(`data: ${message}\n\n`); // Send log to client
 }
 
+// API endpoint to handle the submission of the TikTok link
 app.post('/submit', async (req, res) => {
   const { link } = req.body;
   if (!link) return res.status(400).json({ message: "TikTok link is required" });
@@ -41,8 +53,8 @@ app.post('/submit', async (req, res) => {
   let browser;
 
   try {
-    logs = []; // Reset logs
-    pushLog("🚀 Let it begain...");
+    logs = []; // Reset logs for each new submission
+    pushLog("🚀 Let it begin...");
 
     browser = await puppeteer.launch({
       headless: true,
@@ -78,7 +90,7 @@ app.post('/submit', async (req, res) => {
       return el && (el.innerText.includes("100") || el.style.width === "100%");
     }, { timeout: 60000 });
 
-    pushLog("✅ Progress complete. finalizing...");
+    pushLog("✅ Progress complete. Finalizing...");
     await new Promise(resolve => setTimeout(resolve, 30000));
 
     pushLog("🔍 Checking result...");
@@ -111,7 +123,7 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-// ✅ Listen on all interfaces and dynamic port for Render
+// ✅ Listen on all interfaces and dynamic port for cloud deployment (Heroku)
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
