@@ -1,136 +1,54 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
+const express = require("express");
+const puppeteer = require("puppeteer-core");
+const chromium = require("chrome-aws-lambda");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
-
-// Serve HTML from 'public' folder if it exists, otherwise return a 404
-const publicFolderPath = path.join(__dirname, 'public');
-if (fs.existsSync(publicFolderPath)) {
-  app.use(express.static(publicFolderPath)); 
-} else {
-  console.warn('Public folder not found.');
-}
-
-// Global variables to store logs and client response
-let clientRes = null;
 let logs = [];
 
-// Endpoint for serving logs to the client in real-time
-app.get('/progress', (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
+app.use(express.json());
+app.use(express.static("public"));
 
-  clientRes = res;
-
-  const sendLog = (log) => {
-    res.write(`data: ${log}\n\n`);
-  };
-
-  logs.forEach(sendLog);
-});
-
-// Utility function to log messages
-function pushLog(message) {
-  console.log(message); // Log to the terminal
-  logs.push(message);
-  if (clientRes) clientRes.write(`data: ${message}\n\n`); // Send log to client
-}
-
-// API endpoint to handle the submission of the TikTok link
-app.post('/submit', async (req, res) => {
-  const { link } = req.body;
-  if (!link) return res.status(400).json({ message: "TikTok link is required" });
-
-  let browser;
+app.post("/submit", async (req, res) => {
+  const { url } = req.body;
+  const id = Math.random().toString(36).substr(2, 9);
+  logs.push({ id, message: `🚀 Let it begin...` });
 
   try {
-    logs = []; // Reset logs for each new submission
-    pushLog("🚀 Let it begin...");
+    logs.push({ id, message: `Launching Puppeteer...` });
 
-    browser = await puppeteer.launch({
-      headless: 'new', // use "new" to match Puppeteer's latest headless mode
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-zygote',
-        '--single-process'
-      ]
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
     });
 
+    logs.push({ id, message: `Navigating to site...` });
     const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 800 });
+    await page.goto(url, { waitUntil: "networkidle2" });
 
-    pushLog("🌐 Navigating to site...");
-    await page.goto('https://leofame.com/free-tiktok-views', { waitUntil: 'domcontentloaded' });
+    logs.push({ id, message: `Page loaded. Performing action...` });
 
-    pushLog("📝 Typing TikTok link...");
-    await page.waitForSelector('input[name="free_link"]', { timeout: 10000 });
-    await page.type('input[name="free_link"]', link);
-
-    pushLog("🚀 Submitting...");
-    await page.click('button[type="submit"]');
-
-    pushLog("⏳ Waiting for progress...");
-    await page.waitForSelector('.progress-bar', { timeout: 60000 });
-
-    for (let progress = 0; progress <= 100; progress += 2) {
-      pushLog(`Progress: ${progress}%`);
-      if (clientRes) {
-        clientRes.write(`data: Progress: ${progress}%\n\n`);
-      }
-      await new Promise(resolve => setTimeout(resolve, 300));
-    }
-
-    await page.waitForFunction(() => {
-      const el = document.querySelector('.progress-bar');
-      return el && (el.innerText.includes("100") || el.style.width === "100%");
-    }, { timeout: 60000 });
-
-    pushLog("✅ Progress complete. Finalizing...");
-    await new Promise(resolve => setTimeout(resolve, 30000));
-
-    pushLog("🔍 Checking result...");
-    const popupStatus = await page.evaluate(() => {
-      const popup = document.querySelector('.swal2-popup.swal2-modal.swal2-icon-success.swal2-show');
-      if (!popup) return 'No Popup';
-      const icon = popup.querySelector('.swal2-icon');
-      if (icon && icon.classList.contains('swal2-icon-error')) return 'Error';
-      if (popup.classList.contains('swal2-icon-success')) return 'Success';
-      return 'Unknown';
-    });
+    // Simulate work (replace with real action)
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     await browser.close();
+    logs.push({ id, message: `✅ Done!` });
 
-    if (popupStatus === 'Success') {
-      pushLog("🎉 Success: Views added!");
-      return res.json({ message: "✅ Success: Views successfully added!" });
-    } else if (popupStatus === 'Error') {
-      pushLog("❌ Error: Submission failed.");
-      return res.json({ message: "⚠️ Error: Try again later." });
-    } else {
-      pushLog("❔ Unknown popup status.");
-      return res.json({ message: "⚠️ Error: Try again later." });
-    }
-
+    res.status(200).json({ success: true, id });
   } catch (err) {
-    if (browser) await browser.close();
-    pushLog(`❌ Error: ${err.message}`);
-    return res.status(500).json({ message: "❌ Automation error: " + err.message });
+    logs.push({ id, message: `❌ Error: ${err.message}` });
+    res.status(500).json({ success: false, error: err.message, id });
   }
 });
 
-// ✅ Listen on all interfaces and dynamic port for cloud deployment (Heroku)
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+app.get("/progress", (req, res) => {
+  res.json(logs);
+});
+
+app.listen(port, () => {
+  console.log(`🚀 Server running on port ${port}`);
 });
