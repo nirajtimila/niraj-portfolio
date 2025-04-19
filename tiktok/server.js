@@ -1,8 +1,6 @@
 const express = require("express");
 const puppeteer = require("puppeteer-core");
 const chromium = require("chrome-aws-lambda");
-const fs = require("fs");
-const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,29 +18,28 @@ app.post("/submit", async (req, res) => {
   try {
     logs.push({ id, message: `Launching Puppeteer...` });
 
-    // Using the CHROMIUM_BIN environment variable from Heroku config
     const browser = await puppeteer.launch({
       args: chromium.args,
-      executablePath: process.env.CHROMIUM_BIN || await chromium.executablePath,
+      executablePath: await chromium.executablePath || process.env.CHROMIUM_BIN,
       headless: chromium.headless,
+      defaultViewport: chromium.defaultViewport,
     });
 
-    logs.push({ id, message: `Navigating to site...` });
     const page = await browser.newPage();
+    logs.push({ id, message: `Navigating to ${url}...` });
+
     await page.goto(url, { waitUntil: "networkidle2" });
 
-    logs.push({ id, message: `Page loaded. Performing action...` });
-
-    // Simulate work (replace with real action)
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Simulate doing something
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     await browser.close();
     logs.push({ id, message: `✅ Done!` });
 
     res.status(200).json({ success: true, id });
   } catch (err) {
-    logs.push({ id, message: `❌ Error: ${err.message}` });
-    res.status(500).json({ success: false, error: err.message, id });
+    logs.push({ id, message: `❌ Automation error: ${err.message}` });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
