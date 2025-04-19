@@ -20,15 +20,10 @@ app.post("/submit", async (req, res) => {
   try {
     logs.push({ id, message: `Launching Puppeteer...` });
 
-    // Puppeteer launch with Heroku Chromium support
+    // Using the CHROMIUM_BIN environment variable from Heroku config
     const browser = await puppeteer.launch({
-      args: chromium.args.concat([
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--single-process',
-        '--disable-dev-shm-usage', // To prevent memory issues on Heroku
-      ]),
-      executablePath: process.env.CHROMIUM_BIN || await chromium.executablePath, // Use Heroku chromium or fallback to chrome-aws-lambda
+      args: chromium.args,
+      executablePath: process.env.CHROMIUM_BIN || await chromium.executablePath,
       headless: chromium.headless,
     });
 
