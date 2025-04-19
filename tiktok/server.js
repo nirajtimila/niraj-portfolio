@@ -1,49 +1,62 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-const cors = require('cors');
-const path = require('path');
+const express = require("express");
+const puppeteer = require("puppeteer-core");
+const chromium = require("chrome-aws-lambda");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+let logs = [];
 
-// Example route where you launch Puppeteer
-app.post('/submit', async (req, res) => {
-  console.log('🚀 Let it begin...');
+app.use(express.json());
+app.use(express.static("public"));
+
+app.post("/submit", async (req, res) => {
+  const { url } = req.body;
+  const id = Math.random().toString(36).substr(2, 9);
+  logs.push({ id, message: `🚀 Let it begin...` });
 
   try {
-    // Launch Puppeteer with specific args for Heroku
+    logs.push({ id, message: `Launching Puppeteer...` });
+
+    // Launch Puppeteer with necessary arguments for Heroku
     const browser = await puppeteer.launch({
-      headless: true,  // Run in headless mode
       args: [
+        ...chromium.args,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--single-process',
         '--disable-dev-shm-usage',  // Add this line to reduce memory usage on Heroku
         '--remote-debugging-port=9222'
       ],
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
     });
 
+    logs.push({ id, message: `Navigating to site...` });
     const page = await browser.newPage();
-    
-    // Add your Puppeteer logic here, like navigating to a page and interacting with it
-    await page.goto('https://example.com');
-    const title = await page.title();
-    console.log('Page Title:', title);
+    await page.goto(url, { waitUntil: "networkidle2" });
+
+    logs.push({ id, message: `Page loaded. Performing action...` });
+
+    // Simulate work (replace with real action)
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     await browser.close();
-    
-    res.status(200).send('Request processed successfully');
+    logs.push({ id, message: `✅ Done!` });
+
+    res.status(200).json({ success: true, id });
   } catch (err) {
-    console.error('Error launching Puppeteer:', err);
-    res.status(500).send('Something went wrong!');
+    logs.push({ id, message: `❌ Error: ${err.message}` });
+    res.status(500).json({ success: false, error: err.message, id });
   }
 });
 
-// Start server
+app.get("/progress", (req, res) => {
+  res.json(logs);
+});
+
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
 });
