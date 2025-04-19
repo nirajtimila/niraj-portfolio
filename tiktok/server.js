@@ -20,17 +20,16 @@ app.post("/submit", async (req, res) => {
   try {
     logs.push({ id, message: `Launching Puppeteer...` });
 
-    // Launch Puppeteer with Heroku-compatible settings
+    // Puppeteer launch with Heroku Chromium support
     const browser = await puppeteer.launch({
-      args: [
+      args: chromium.args.concat([
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--single-process',
-        '--disable-dev-shm-usage', // To prevent memory issues
-        '--remote-debugging-port=9222'
-      ],
-      executablePath: process.env.CHROMIUM_BIN || await chromium.executablePath, // Use Heroku chromium
-      headless: true,
+        '--disable-dev-shm-usage', // To prevent memory issues on Heroku
+      ]),
+      executablePath: process.env.CHROMIUM_BIN || await chromium.executablePath, // Use Heroku chromium or fallback to chrome-aws-lambda
+      headless: chromium.headless,
     });
 
     logs.push({ id, message: `Navigating to site...` });
