@@ -110,7 +110,8 @@
         }
       }, 300);
 
-      fetch('https://tiktokviewgetter-1472a9f9667f.herokuapp.com/submit', {
+      // Use relative URL for Heroku deployment
+      fetch('/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ link })
@@ -138,8 +139,8 @@
       });
     }
 
-    // Live log streaming
-    const eventSource = new EventSource('https://tiktokviewgetter-1472a9f9667f.herokuapp.com/progress');
+    // Live log streaming with relative URL
+    const eventSource = new EventSource('/progress');
     eventSource.onmessage = function(event) {
       const log = event.data;
       const logsDiv = document.getElementById('logs');
